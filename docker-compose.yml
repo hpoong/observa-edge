@@ -1,0 +1,64 @@
+networks:
+  dev-net:
+    driver: bridge
+
+services:
+  # ---------------- Elasticsearch ----------------
+  elasticsearch:
+    image: docker.elastic.co/elasticsearch/elasticsearch:8.12.0
+    container_name: grid-pulse-elasticsearch
+    environment:
+      - discovery.type=single-node
+      - xpack.security.enabled=false
+      - bootstrap.memory_lock=true
+      - "ES_JAVA_OPTS=-Xms1g -Xmx1g"
+    volumes:
+      - ./docker-data/elasticsearch-data:/usr/share/elasticsearch/data
+    ports:
+      - "9200:9200"
+    ulimits:
+      memlock:
+        soft: -1
+        hard: -1
+    networks: [dev-net]
+
+  # ---------------- Kibana (7.10.2) ----------------
+  kibana:
+    image: docker.elastic.co/kibana/kibana:8.12.0
+    container_name: grid-pulse-kibana
+    depends_on: [ elasticsearch ]
+    environment:
+      ELASTICSEARCH_HOSTS: '["http://elasticsearch:9200"]'
+    ports:
+      - "5601:5601"
+    networks: [ dev-net ]
+
+  # ---------------- Nginx ----------------
+  nginx:
+    image: nginx:1.25-alpine
+    container_name: observa-edge-nginx
+    volumes:
+      - ./nginx/nginx.conf:/etc/nginx/nginx.conf:ro
+      - nginx-logs:/var/log/nginx
+    ports:
+      - "8080:80"
+    networks: [ dev-net ]
+
+  # ---------------- Filebeat ----------------
+  filebeat:
+    image: docker.elastic.co/beats/filebeat:8.12.0
+    container_name: observa-edge-filebeat
+    user: root
+    depends_on:
+      elasticsearch:
+        condition: service_healthy
+    volumes:
+      - ./filebeat/filebeat.yml:/usr/share/filebeat/filebeat.yml:ro
+      - nginx-logs:/var/log/nginx:ro
+      - filebeat-data:/usr/share/filebeat/data
+    command: ["--strict.perms=false"]
+    networks: [ dev-net ]
+
+volumes:
+  nginx-logs:
+  filebeat-data:
