@@ -6,7 +6,7 @@ services:
       - "8080:80"
     volumes:
       # Nginx 로그를 호스트로 내보내서 Filebeat가 읽게 함
-      - ./nginx/logs:/var/log/nginx
+      - ./docker-data/nginx/logs:/var/log/nginx
     restart: unless-stopped
 
   filebeat:
@@ -19,6 +19,6 @@ services:
       # Filebeat 설정 파일 주입 (읽기 전용)
       - ./filebeat/filebeat.yml:/usr/share/filebeat/filebeat.yml:ro
       # Nginx 로그 디렉토리 읽기 (읽기 전용)
-      - ./nginx/logs:/var/log/nginx:ro
+      - ./docker-data/nginx/logs:/var/log/nginx:ro
     command: ["--strict.perms=false"]
     restart: unless-stopped
