@@ -20,5 +20,7 @@ services:
       - ./filebeat/filebeat.yml:/usr/share/filebeat/filebeat.yml:ro
       # Nginx 로그 디렉토리 읽기 (읽기 전용)
       - ./docker-data/nginx/logs:/var/log/nginx:ro
+      # Filebeat가 내부적으로 관리하는 읽기 상태 저장소
+      - /docker-data/filebeat/data:/usr/share/filebeat/data
     command: ["--strict.perms=false"]
     restart: unless-stopped
