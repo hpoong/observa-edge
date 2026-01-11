@@ -1,0 +1,25 @@
+filebeat.inputs:
+  - type: filestream
+    id: nginx-access
+    paths: [/var/log/nginx/access.log]
+    fields_under_root: true
+    fields:
+      input_id: nginx-access
+      service: nginx
+      log_type: access
+
+  - type: filestream
+    id: nginx-error
+    paths: [/var/log/nginx/error.log]
+    fields_under_root: true
+    fields:
+      input_id: nginx-error
+      service: nginx
+      log_type: error
+
+
+# 최소 운영 확인용: Elasticsearch 없이 stdout으로 출력
+output.console:
+  pretty: true
+
+logging.level: info
