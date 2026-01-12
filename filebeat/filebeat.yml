@@ -17,6 +17,18 @@ filebeat.inputs:
       service: nginx
       log_type: error
 
+processors:
+  - drop_fields:
+      fields:
+        - "ecs"
+        - "input"
+        - "agent.ephemeral_id"
+        - "agent.id"
+        - "input_id"
+        - "log.offset"
+        - "log.file.device_id"
+        - "log.file.inode"
+      ignore_missing: true
 
 output.elasticsearch:
   hosts: ["http://elasticsearch:9200"]
